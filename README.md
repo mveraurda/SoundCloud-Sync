@@ -24,7 +24,21 @@ Download SoundCloud playlists and automatically sync them to Apple Music on macO
 
 ## First Time Setup
 
-Before syncing, install required tools by opening Terminal and running:
+opening the app on mac
+
+macOS will block apps from unidentified developers by default. if this happens:
+
+1. open System Settings → Privacy & Security
+2. under Security, you’ll see a message about the app being blocked
+3. click Open Anyway
+4. confirm you want to open it
+
+after this, you can launch it normally.
+
+##Install Dependencies 
+Install pip install first 
+
+Before syncing, install required tools (used by app) by opening Terminal and running:
 ```
 pip install scdl yt-dlp ffmpeg-python --break-system-packages
 ```
