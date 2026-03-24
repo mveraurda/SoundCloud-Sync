@@ -39,7 +39,7 @@ after this, you can launch it normally.
 Install pip install first 
 
 Before syncing, install required tools (used by app) by opening Terminal and running:
-```
+```bash
 pip install scdl yt-dlp ffmpeg-python --break-system-packages
 ```
 
