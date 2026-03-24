@@ -1,0 +1,32 @@
+{
+  "name": "soundcloud-apple-music-sync",
+  "version": "1.0.0",
+  "main": "public/electron.js",
+  "scripts": {
+    "start": "electron .",
+    "build-mac": "electron-builder --mac"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "electron-is-dev": "^1.2.0"
+  },
+  "devDependencies": {
+    "electron": "latest",
+    "electron-builder": "latest"
+  },
+  "build": {
+    "appId": "com.soundcloud-sync.app",
+    "productName": "SoundCloud to Apple Music",
+    "files": [
+      "public/**/*",
+      "node_modules/**/*"
+    ],
+    "asar": false,
+    "mac": {
+      "target": ["dmg", "zip"],
+      "category": "public.app-category.music",
+      "icon": "icon.icns"
+    }
+  }
+}

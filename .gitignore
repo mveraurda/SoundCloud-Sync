@@ -1,0 +1,8 @@
+node_modules/
+dist/
+*.dmg
+*.zip
+*.blockmap
+*.yaml
+.DS_Store
+.env
