@@ -33,28 +33,19 @@ macOS will block apps from unidentified developers by default. if this happens:
 3. click Open Anyway
 4. confirm you want to open it
 
-after this, you can launch it normally.
-
-##Install Dependencies 
-Install pip install first 
-
-Before syncing, install required tools (used by app) by opening Terminal and running:
-```bash
-pip install scdl yt-dlp ffmpeg-python --break-system-packages
-```
-
-This only needs to be done once.
 
 ## How to Use
 
+Before you start
+Make sure Apple Music is open.
+
+To sync across your devices:
+
+   - Open Apple Music
+   - Go to Music → Settings → General
+   - Turn on “Sync Library”
+
 1. Get your SoundCloud token:
-   - Open soundcloud.com and log in
-   - Open Developer Tools (F12 on Windows, Cmd+Option+I on Mac)
-   - Go to Network tab
-   - Filter for "api"
-   - Refresh the page or navigate to a playlist
-   - Click any API request and find the Authorization header
-   - Copy the token after "token="
 
 2. Enter your SoundCloud token in the app
 
@@ -67,6 +58,8 @@ This only needs to be done once.
 6. Click "Start Sync"
 
 7. Check Apple Music for your new songs
+
+8. After a few minutes songs should be synced to your other devices using same icloud (iPhone and ipad)
 
 ## Important
 

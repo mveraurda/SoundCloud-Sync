@@ -24,11 +24,16 @@
         .header-bar { background: linear-gradient(135deg, rgba(255, 85, 0, 0.1) 0%, transparent 100%); border-bottom: 1px solid var(--border); padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; }
         .header-title { font-size: 1.2rem; font-weight: 700; color: var(--primary); }
         .header-badge { background: var(--primary); color: white; padding: 4px 12px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; }
-        .header-actions { display: flex; align-items: center; gap: 12px; }
-        .how-to-use-btn { background: rgba(255,255,255,0.08); color: var(--text); border: 1px solid var(--border); padding: 6px 14px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; cursor: pointer; transition: all 0.2s ease; font-family: 'IBM Plex Sans', sans-serif; }
-        .how-to-use-btn:hover { background: rgba(255,255,255,0.14); border-color: var(--primary); color: var(--primary); }
         .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; gap: 1px; background: var(--border); padding: 1px; }
-
+        .instructions-panel { background: var(--surface); border-bottom: 1px solid var(--border); overflow: hidden; transition: max-height 0.3s ease; max-height: 120px; }
+        .instructions-panel.hidden { max-height: 0; border-bottom: none; }
+        .instructions-inner { padding: 20px 24px; }
+        .instructions-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none; }
+        .instructions-title { font-size: 0.9rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--primary); }
+        .toggle-btn { background: none; border: none; color: var(--primary); font-size: 1.5rem; cursor: pointer; padding: 0; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; }
+        .instructions-content { font-size: 0.85rem; line-height: 1.6; color: var(--text-muted); margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); }
+        .instructions-content ol { margin-left: 20px; }
+        .instructions-content li { margin-bottom: 6px; }
         .modal { display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.8); }
         .modal.show { display: flex; align-items: center; justify-content: center; }
         .modal-content { background-color: var(--surface); padding: 30px; border: 1px solid var(--border); border-radius: 6px; width: 90%; max-width: 700px; max-height: 80vh; overflow-y: auto; color: var(--text); }
@@ -92,14 +97,27 @@
     <div class="app-container">
         <div class="header-bar">
             <div class="header-title">SoundCloud to Apple Music Sync</div>
-            <div class="header-actions">
-                <button class="how-to-use-btn" onclick="openHowToUse()">How to Use</button>
-                <button class="how-to-use-btn" onclick="openSoundCloud()" style="color: var(--primary); border-color: var(--primary);">Open SoundCloud</button>
-                <div class="header-badge">macOS Only</div>
-            </div>
+            <div class="header-badge">macOS Only</div>
         </div>
 
         <div class="main-content">
+            <div class="instructions-panel" id="instructionsPanel">
+                <div class="instructions-inner">
+                    <div class="instructions-header" onclick="toggleInstructions()">
+                        <div class="instructions-title">Quick Start</div>
+                        <button class="toggle-btn" id="toggleBtn">−</button>
+                    </div>
+                    <div class="instructions-content">
+                        <ol>
+                            <li>Get your SoundCloud token (click "How to Get?" button below)</li>
+                            <li>Paste token and playlist URL</li>
+                            <li>Click "Start Sync"</li>
+                            <li>Check Apple Music for your new songs</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+
             <div class="panels-container">
                 <div class="panel">
                     <div class="panel-header">
@@ -107,13 +125,25 @@
                         <p>Set up your sync</p>
                     </div>
                     <div class="panel-content">
+                        <button class="button button-secondary" onclick="openSoundCloudLogin()">Get Token</button>
+                        <div class="form-group" style="background: rgba(255, 85, 0, 0.1); border: 1px solid var(--primary); border-radius: 6px; padding: 15px; margin-bottom: 18px;">
+                            <div style="font-size: 0.9rem; font-weight: 700; color: var(--primary); margin-bottom: 12px;">Steps to Get Your Token:</div>
+                            <ol style="margin-left: 20px; font-size: 0.85rem; color: var(--text-muted); line-height: 1.8;">
+                                <li>Click "Get Token" above to open SoundCloud</li>
+                                <li>Log in to your account</li>
+                                <li>Press Cmd+Option+I to open DevTools</li>
+                                <li>Go to Application tab</li>
+                                <li>Click Cookies in sidebar</li>
+                                <li>Click https://soundcloud.com</li>
+                                <li>Search for "oa" in the cookies</li>
+                                <li>Copy the Value and paste below</li>
+                            </ol>
+                        </div>
+
                         <div class="form-group">
                             <label>SoundCloud Auth Token <span class="required">*</span></label>
-                            <div class="path-container">
-                                <input type="text" id="authToken" placeholder="Paste your token here (starts with 2-)">
-                                <button class="button button-secondary button-small" onclick="openGuide()">How to Get?</button>
-                            </div>
-                            <div class="help-text">Find your token via browser cookies — click "How to Get?" for a walkthrough</div>
+                            <input type="text" id="authToken" placeholder="Paste your token here">
+                            <div class="help-text">Get from browser DevTools (see guide above)</div>
                         </div>
 
                         <div class="form-group">
@@ -185,129 +215,52 @@
                 <button class="close-btn" onclick="closeGuide()">×</button>
             </div>
 
-            <div class="info-badge" style="font-size: 0.8rem; text-transform: none; font-weight: 400; padding: 10px 14px; margin-bottom: 20px;">
-                💾 After clicking <strong>"Save Config"</strong>, your token is saved and you won't need to do this again — unless it expires occasionally.
-            </div>
-
             <div class="guide-step">
                 <span class="guide-step-number">1</span>
-                <span class="guide-step-title">Log In to SoundCloud</span>
-                <div class="guide-step-content">Use the SoundCloud window that opened in your browser (or click <strong>Open SoundCloud</strong> in the top bar) and log in to your account.</div>
+                <span class="guide-step-title">Open a Web Browser</span>
+                <div class="guide-step-content">Go to soundcloud.com and log in to your account</div>
             </div>
 
             <div class="guide-step">
                 <span class="guide-step-number">2</span>
-                <span class="guide-step-title">Open DevTools</span>
-                <div class="guide-step-content">Press <strong>Cmd + Option + I</strong> on Mac to open the browser Developer Tools panel.</div>
+                <span class="guide-step-title">Open Developer Tools</span>
+                <div class="guide-step-content">Press F12 on Windows or Cmd + Option + I on Mac</div>
             </div>
 
             <div class="guide-step">
                 <span class="guide-step-number">3</span>
-                <span class="guide-step-title">Go to the Storage Tab</span>
-                <div class="guide-step-content">Click <strong>Storage</strong> at the top of the DevTools panel. If you're using Chrome, look for <strong>Application</strong> instead.</div>
+                <span class="guide-step-title">Go to Network Tab</span>
+                <div class="guide-step-content">Click the Network tab at the top of the DevTools panel</div>
             </div>
 
             <div class="guide-step">
                 <span class="guide-step-number">4</span>
-                <span class="guide-step-title">Click Cookies</span>
-                <div class="guide-step-content">In the left sidebar, click <strong>Cookies</strong> to expand it.</div>
+                <span class="guide-step-title">Filter for API Requests</span>
+                <div class="guide-step-content">Type <strong>api</strong> in the filter box to see only API requests</div>
             </div>
 
             <div class="guide-step">
                 <span class="guide-step-number">5</span>
-                <span class="guide-step-title">Select soundcloud.com</span>
-                <div class="guide-step-content">Under Cookies, click on <strong>https://soundcloud.com</strong> to see the cookies for that site.</div>
+                <span class="guide-step-title">Trigger a Request</span>
+                <div class="guide-step-content">Refresh the SoundCloud page or navigate to a playlist</div>
             </div>
 
             <div class="guide-step">
                 <span class="guide-step-number">6</span>
-                <span class="guide-step-title">Filter for Your Token</span>
-                <div class="guide-step-content">At the top of the cookies list, use the filter bar and type <strong>oauth</strong> to narrow down the results.</div>
+                <span class="guide-step-title">Find Authorization Header</span>
+                <div class="guide-step-content">Click any API request and find Request Headers section</div>
             </div>
 
             <div class="guide-step">
                 <span class="guide-step-number">7</span>
-                <span class="guide-step-title">Find Your Token</span>
-                <div class="guide-step-content">Look for a cookie value that starts with <strong>"2-"</strong> followed by numbers and letters. It will look something like this:
-                    <div class="code-block">2-123456-789012345-AbCdEfGhIjKlMnOp</div>
-                </div>
+                <span class="guide-step-title">Copy Your Token</span>
+                <div class="guide-step-content">Look for Authorization header and copy the token after "token="</div>
             </div>
 
             <div class="guide-step">
                 <span class="guide-step-number">8</span>
-                <span class="guide-step-title">Copy the Value</span>
-                <div class="guide-step-content">Click on that cookie row and copy the entire value from the <strong>Value</strong> column.</div>
-            </div>
-
-            <div class="guide-step">
-                <span class="guide-step-number">9</span>
-                <span class="guide-step-title">Paste It Below</span>
-                <div class="guide-step-content">Close this guide, paste your token into the <strong>SoundCloud Auth Token</strong> field, and the app will verify it's valid.</div>
-            </div>
-        </div>
-    </div>
-
-    <div id="howToUseModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>How to Use This App</h2>
-                <button class="close-btn" onclick="closeHowToUse()">×</button>
-            </div>
-
-            <div class="info-badge">⚠ Before you begin — make sure Apple Music is open on your Mac</div>
-
-            <div class="guide-step">
-                <span class="guide-step-number">0</span>
-                <span class="guide-step-title">Enable iCloud Sync (Optional but Recommended)</span>
-                <div class="guide-step-content">To have your synced songs automatically appear on your iPhone and iPad, open Apple Music, click <strong>Music</strong> in the top menu bar, go to <strong>Settings</strong>, and under the <strong>General</strong> tab turn on <strong>Sync Library</strong>. After a few minutes your songs will appear across all devices sharing the same iCloud account.</div>
-            </div>
-
-            <div class="guide-step">
-                <span class="guide-step-number">1</span>
-                <span class="guide-step-title">Grab Your SoundCloud Auth Token</span>
-                <div class="guide-step-content">You'll need to retrieve your personal SoundCloud token from your browser. Click the <strong>"How to Get Token?"</strong> button on the left panel for a step-by-step walkthrough.</div>
-            </div>
-
-            <div class="guide-step">
-                <span class="guide-step-number">2</span>
-                <span class="guide-step-title">Enter Your Token</span>
-                <div class="guide-step-content">Paste the token you just copied into the <strong>SoundCloud Auth Token</strong> field in the Configuration panel.</div>
-            </div>
-
-            <div class="guide-step">
-                <span class="guide-step-number">3</span>
-                <span class="guide-step-title">Paste Your Playlist URL</span>
-                <div class="guide-step-content">Copy the link to your SoundCloud playlist and paste it into the <strong>Playlist URL</strong> field. Make sure it's a direct playlist link.</div>
-            </div>
-
-            <div class="guide-step">
-                <span class="guide-step-number">4</span>
-                <span class="guide-step-title">Create a Fresh Folder for This Album</span>
-                <div class="guide-step-content">This is important — create a <strong>brand new folder</strong> for each album you sync. Never reuse an existing folder, as this can cause issues with your music library. Click <strong>Browse</strong> to select it.</div>
-            </div>
-
-            <div class="guide-step">
-                <span class="guide-step-number">5</span>
-                <span class="guide-step-title">Name Your Album & Artist</span>
-                <div class="guide-step-content">Enter an <strong>Album Name</strong> — this is how it will appear in Apple Music. You can also add an <strong>Artist</strong> name if you'd like.</div>
-            </div>
-
-            <div class="guide-step">
-                <span class="guide-step-number">6</span>
-                <span class="guide-step-title">Hit Start Sync</span>
-                <div class="guide-step-content">Click the <strong>Start Sync</strong> button and let the app do its thing. You can watch the progress in the terminal output on the right panel.</div>
-            </div>
-
-            <div class="guide-step">
-                <span class="guide-step-number">7</span>
-                <span class="guide-step-title">Check Apple Music</span>
-                <div class="guide-step-content">Once the sync completes, open <strong>Apple Music</strong> and your new songs should be waiting for you in your library.</div>
-            </div>
-
-            <div class="guide-step">
-                <span class="guide-step-number">8</span>
-                <span class="guide-step-title">Wait for iCloud to Sync</span>
-                <div class="guide-step-content">If you have Sync Library turned on, your songs will automatically appear on your iPhone and iPad within a few minutes — no extra steps needed.</div>
+                <span class="guide-step-title">Paste Token</span>
+                <div class="guide-step-content">Close this guide and paste your token in the SoundCloud Auth Token field</div>
             </div>
         </div>
     </div>
@@ -332,18 +285,11 @@
 
         window.addEventListener('DOMContentLoaded', loadConfigOnStartup);
 
-        function openSoundCloud() {
-            window.open('https://soundcloud.com', '_blank');
-        }
-
-        function toggleInstructions() {}
-
-        function openHowToUse() {
-            document.getElementById('howToUseModal').classList.add('show');
-        }
-
-        function closeHowToUse() {
-            document.getElementById('howToUseModal').classList.remove('show');
+        function toggleInstructions() {
+            const panel = document.getElementById('instructionsPanel');
+            const btn = document.getElementById('toggleBtn');
+            panel.classList.toggle('hidden');
+            btn.textContent = panel.classList.contains('hidden') ? '+' : '−';
         }
 
         function openGuide() {
@@ -357,9 +303,6 @@
         window.onclick = function(event) {
             if (event.target == document.getElementById('guideModal')) {
                 document.getElementById('guideModal').classList.remove('show');
-            }
-            if (event.target == document.getElementById('howToUseModal')) {
-                document.getElementById('howToUseModal').classList.remove('show');
             }
         }
 
