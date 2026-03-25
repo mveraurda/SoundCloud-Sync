@@ -4,3 +4,7 @@ dist/
 *.dmg
 *.zip
 .env
+resources/sync_bin
+resources/ffmpeg
+resources/scdl
+dist/
