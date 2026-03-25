@@ -9,12 +9,34 @@ const os = require('os');
 let mainWindow;
 let expressApp;
 
-function getPythonPath() {
-    const pyenvPath = path.join(os.homedir(), '.pyenv/shims/python3');
-    if (fs.existsSync(pyenvPath)) {
-        return pyenvPath;
+// Get path to bundled binaries inside the .app package
+function getResourcesPath() {
+    // process.resourcesPath is always correct in packaged app
+    if (process.resourcesPath) {
+        return process.resourcesPath;
     }
-    return 'python3';
+    // fallback for dev
+    return path.join(__dirname, '..', 'resources');
+}
+
+function getSyncBinPath() {
+    return path.join(getResourcesPath(), 'sync_bin');
+}
+
+function getFfmpegPath() {
+    return path.join(getResourcesPath(), 'ffmpeg');
+}
+
+// Make sure bundled binaries are executable
+function ensureBinariesExecutable() {
+    const syncBin = getSyncBinPath();
+    const ffmpeg = getFfmpegPath();
+    try {
+        if (fs.existsSync(syncBin)) fs.chmodSync(syncBin, '755');
+        if (fs.existsSync(ffmpeg)) fs.chmodSync(ffmpeg, '755');
+    } catch (e) {
+        console.log('chmod error (non-fatal):', e.message);
+    }
 }
 
 function createServer() {
@@ -22,7 +44,7 @@ function createServer() {
     expressApp.use(express.json());
     expressApp.use(express.static(path.join(__dirname, '.')));
 
-    const CONFIG_FILE = path.join(os.homedir(), 'Projects/music downloader/config.txt');
+    const CONFIG_FILE = path.join(os.homedir(), '.soundcloud_sync', 'config.txt');
 
     expressApp.post('/api/config/save', (req, res) => {
         const { authToken, playlistUrl, albumName, albumArtist, downloadPath } = req.body;
@@ -48,9 +70,10 @@ ALBUM_ARTIST=${albumArtist}`;
                 const content = fs.readFileSync(CONFIG_FILE, 'utf8');
                 const config = {};
                 content.split('\n').forEach(line => {
-                    const [key, value] = line.split('=');
+                    const [key, ...rest] = line.split('=');
+                    const value = rest.join('='); // handle values that contain =
                     if (key && value) {
-                        config[key.toLowerCase()] = value;
+                        config[key.toLowerCase()] = value.trim();
                     }
                 });
                 res.json(config);
@@ -69,21 +92,33 @@ ALBUM_ARTIST=${albumArtist}`;
 
         const { authToken, playlistUrl, albumName, albumArtist, downloadPath } = req.body;
 
-        const pythonPath = getPythonPath();
-        const pythonScript = path.join(__dirname, 'sync.py');
+        const syncBin = getSyncBinPath();
+        const ffmpegPath = getFfmpegPath();
 
-        const python = spawn(pythonPath, [
-            pythonScript,
+        // Check bundled binary exists
+        if (!fs.existsSync(syncBin)) {
+            res.write(`data: ${JSON.stringify({ type: 'error', message: 'Sync binary not found. Please reinstall the app.' })}\n\n`);
+            res.end();
+            return;
+        }
+
+        // Pass ffmpeg path as env variable so sync_bin can find it
+        const env = {
+            ...process.env,
+            FFMPEG_PATH: ffmpegPath,
+            PATH: `${getResourcesPath()}:${process.env.PATH}`
+        };
+
+        const syncProcess = spawn(syncBin, [
             '--auth-token', authToken,
             '--playlist-url', playlistUrl,
             '--album-name', albumName,
-            '--album-artist', albumArtist,
+            '--album-artist', albumArtist || '',
             '--download-path', downloadPath
-        ]);
+        ], { env });
 
-        python.stdout.on('data', (data) => {
-            const text = data.toString();
-            const lines = text.split('\n');
+        syncProcess.stdout.on('data', (data) => {
+            const lines = data.toString().split('\n');
             lines.forEach(line => {
                 if (line.trim()) {
                     res.write(`data: ${JSON.stringify({ type: 'log', message: line })}\n\n`);
@@ -91,9 +126,8 @@ ALBUM_ARTIST=${albumArtist}`;
             });
         });
 
-        python.stderr.on('data', (data) => {
-            const text = data.toString();
-            const lines = text.split('\n');
+        syncProcess.stderr.on('data', (data) => {
+            const lines = data.toString().split('\n');
             lines.forEach(line => {
                 if (line.trim()) {
                     res.write(`data: ${JSON.stringify({ type: 'log', message: line })}\n\n`);
@@ -101,7 +135,7 @@ ALBUM_ARTIST=${albumArtist}`;
             });
         });
 
-        python.on('close', (code) => {
+        syncProcess.on('close', (code) => {
             if (code !== 0) {
                 res.write(`data: ${JSON.stringify({ type: 'error', message: `Process exited with code ${code}` })}\n\n`);
             } else {
@@ -110,8 +144,8 @@ ALBUM_ARTIST=${albumArtist}`;
             res.end();
         });
 
-        python.on('error', (err) => {
-            res.write(`data: ${JSON.stringify({ type: 'error', message: err.message })}\n\n`);
+        syncProcess.on('error', (err) => {
+            res.write(`data: ${JSON.stringify({ type: 'error', message: `Failed to start sync: ${err.message}` })}\n\n`);
             res.end();
         });
     });
@@ -158,6 +192,7 @@ ipcMain.handle('select-directory', async () => {
 });
 
 app.on('ready', () => {
+    ensureBinariesExecutable();
     createServer();
     createWindow();
 
@@ -172,7 +207,7 @@ app.on('ready', () => {
                             type: 'info',
                             title: 'SoundCloud to Apple Music Sync',
                             message: 'SoundCloud to Apple Music Sync',
-                            detail: 'Download SoundCloud playlists and automatically sync to Apple Music\n\nVersion 1.0'
+                            detail: 'Download SoundCloud playlists and automatically sync to Apple Music\n\nVersion 1.2.0'
                         });
                     }
                 },

@@ -1,6 +1,6 @@
 {
   "name": "soundcloud-apple-music-sync",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "main": "public/electron.js",
   "scripts": {
     "start": "electron .",
@@ -22,11 +22,37 @@
       "public/**/*",
       "node_modules/**/*"
     ],
+    "extraResources": [
+      {
+        "from": "resources/",
+        "to": ".",
+        "filter": ["sync_bin", "ffmpeg"]
+      }
+    ],
     "asar": false,
     "mac": {
       "target": ["dmg", "zip"],
       "category": "public.app-category.music",
       "icon": "icon.icns"
+    },
+    "dmg": {
+      "contents": [
+        {
+          "x": 130,
+          "y": 220,
+          "type": "file"
+        },
+        {
+          "x": 410,
+          "y": 220,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ],
+      "window": {
+        "width": 540,
+        "height": 380
+      }
     }
   }
 }
