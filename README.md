@@ -46,6 +46,7 @@ macOS blocks apps from unidentified developers by default. If you see a warning:
   - The playlist URL is a direct link (e.g. `soundcloud.com/user/sets/playlist-name`)
   - Your download folder isn't empty
   - Apple Music is running
+  - Playlist is public (DOES NOT WORK FOR PRIVATE PLAYLISTS)
 
 ---
 
