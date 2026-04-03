@@ -154,15 +154,6 @@
                         </div>
                         <div class="panel-content">
                             <div class="form-group">
-                                <label>SoundCloud Auth Token <span class="required">*</span></label>
-                                <div class="path-container">
-                                    <input type="text" id="amAuthToken" placeholder="Paste your token here (starts with 2-)">
-                                    <button class="button button-secondary button-small" onclick="openGuide()">How to Get?</button>
-                                </div>
-                                <div class="help-text">Find via browser cookies — click "How to Get?" for a walkthrough</div>
-                            </div>
-
-                            <div class="form-group">
                                 <label>SoundCloud Playlist URL <span class="required">*</span></label>
                                 <input type="text" id="amPlaylistUrl" placeholder="https://soundcloud.com/username/sets/playlist">
                                 <div class="help-text">Direct playlist link only</div>
@@ -192,6 +183,16 @@
                                 <div class="status-label">State</div>
                                 <div class="status-value idle" id="amStatusText">Ready</div>
                             </div>
+                            <div id="amProgressBox" style="display:none; margin-bottom:16px;">
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                                    <span style="font-size:0.72rem; font-weight:600; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted);">Downloaded</span>
+                                    <span id="amProgressText" style="font-size:0.82rem; font-family:'IBM Plex Mono',monospace; color:var(--text);">0 / 0 songs</span>
+                                </div>
+                                <div style="background:rgba(255,255,255,0.07); border-radius:4px; height:10px; overflow:hidden;">
+                                    <div id="amProgressBar" style="height:100%; background:var(--primary); width:0%; transition:width 0.5s ease; border-radius:4px;"></div>
+                                </div>
+                                <div id="amErrorHint" style="display:none; margin-top:8px; font-size:0.78rem; color:var(--danger);">Some tracks had errors - check terminal for details.</div>
+                            </div>
                             <div class="toggle-terminal" onclick="toggleTerminal('amTerminal')"> > View Terminal Output</div>
                             <div class="terminal" id="amTerminal"></div>
                             <div class="status-box" id="amCompleteBox" style="display:none;">
@@ -218,21 +219,10 @@
                         </div>
                         <div class="panel-content">
                             <div class="form-group">
-                                <label>SoundCloud Auth Token <span class="required">*</span></label>
-                                <div class="path-container">
-                                    <input type="text" id="spAuthToken" placeholder="Paste your token here (starts with 2-)">
-                                    <button class="button button-secondary button-small" onclick="openGuide()">How to Get?</button>
-                                </div>
-                                <div class="help-text">Find via browser cookies — click "How to Get?" for a walkthrough</div>
-                            </div>
-
-                            <div class="form-group">
                                 <label>SoundCloud Playlist URL <span class="required">*</span></label>
                                 <input type="text" id="spPlaylistUrl" placeholder="https://soundcloud.com/username/sets/playlist">
                                 <div class="help-text">Direct playlist link only</div>
                             </div>
-
-                            <div class="info-note">Songs will be downloaded to your chosen folder and automatically appear in Spotify under Local Files. You can then add them to any playlist manually.</div>
 
                             <div class="form-group">
                                 <label>Download Folder <span class="required">*</span></label>
@@ -258,6 +248,16 @@
                                 <div class="status-label">State</div>
                                 <div class="status-value idle" id="spStatusText">Ready</div>
                             </div>
+                            <div id="spProgressBox" style="display:none; margin-bottom:16px;">
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                                    <span style="font-size:0.72rem; font-weight:600; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted);">Downloaded</span>
+                                    <span id="spProgressText" style="font-size:0.82rem; font-family:'IBM Plex Mono',monospace; color:var(--text);">0 / 0 songs</span>
+                                </div>
+                                <div style="background:rgba(255,255,255,0.07); border-radius:4px; height:10px; overflow:hidden;">
+                                    <div id="spProgressBar" style="height:100%; background:#1DB954; width:0%; transition:width 0.5s ease; border-radius:4px;"></div>
+                                </div>
+                                <div id="spErrorHint" style="display:none; margin-top:8px; font-size:0.78rem; color:var(--danger);">Some tracks had errors - check terminal for details.</div>
+                            </div>
                             <div class="toggle-terminal" onclick="toggleTerminal('spTerminal')"> > View Terminal Output</div>
                             <div class="terminal" id="spTerminal"></div>
                             <div class="status-box" id="spCompleteBox" style="display:none;">
@@ -269,22 +269,22 @@
                             <!-- iPhone Sync Panel -->
                             <div id="iphoneSyncPanel" style="display:none; margin-top:16px; background:rgba(29,185,84,0.06); border:1px solid rgba(29,185,84,0.25); border-radius:6px; padding:18px;">
                                 <div style="margin-bottom:14px;">
-                                    <div style="font-size:0.82rem; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:#1DB954;">iPhone Sync</div>
-                                    <div style="font-size:0.78rem; color:var(--text-muted); margin-top:2px;">Transfer your playlist folder to iPhone via USB</div>
+                                    <div style="font-size:0.82rem; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:#1DB954;">Transfer to iPhone</div>
+                                    <div style="font-size:0.78rem; color:var(--text-muted); margin-top:2px;">Follow these steps to get your songs on your iPhone</div>
                                 </div>
 
-                                <div id="iphoneSteps" style="display:none; margin-bottom:14px;">
+                                <div style="margin-bottom:14px;">
                                     <div style="display:flex; gap:10px; margin-bottom:10px; font-size:0.82rem; color:var(--text-muted); line-height:1.5;">
                                         <span style="color:#1DB954; font-weight:700; min-width:18px;">1.</span>
                                         <span>Plug your iPhone into your Mac with a USB cable.</span>
                                     </div>
                                     <div style="display:flex; gap:10px; margin-bottom:10px; font-size:0.82rem; color:var(--text-muted); line-height:1.5;">
                                         <span style="color:#1DB954; font-weight:700; min-width:18px;">2.</span>
-                                        <span>Click <strong style="color:var(--text);">Open Parent Folder</strong> below — Finder will open to the folder containing your playlist.</span>
+                                        <span>Click <strong style="color:var(--text);">Open Song Folder</strong> below. Finder will open to your downloaded playlist.</span>
                                     </div>
                                     <div style="display:flex; gap:10px; margin-bottom:10px; font-size:0.82rem; color:var(--text-muted); line-height:1.5;">
                                         <span style="color:#1DB954; font-weight:700; min-width:18px;">3.</span>
-                                        <span>In the Finder sidebar, click your iPhone → <strong style="color:var(--text);">Files</strong> → <strong style="color:var(--text);">Spotify</strong>.</span>
+                                        <span>In the Finder sidebar click your iPhone, then <strong style="color:var(--text);">Files</strong>, then <strong style="color:var(--text);">Spotify</strong>.</span>
                                     </div>
                                     <div style="display:flex; gap:10px; margin-bottom:10px; font-size:0.82rem; color:var(--text-muted); line-height:1.5;">
                                         <span style="color:#1DB954; font-weight:700; min-width:18px;">4.</span>
@@ -292,14 +292,11 @@
                                     </div>
                                     <div style="display:flex; gap:10px; margin-bottom:0; font-size:0.82rem; color:var(--text-muted); line-height:1.5;">
                                         <span style="color:#1DB954; font-weight:700; min-width:18px;">5.</span>
-                                        <span>Open Spotify on your iPhone → <strong style="color:var(--text);">Your Library</strong> → <strong style="color:var(--text);">Local Files</strong> — your songs will be there.</span>
+                                        <span>Open Spotify on your iPhone, go to <strong style="color:var(--text);">Your Library</strong>, then <strong style="color:var(--text);">Local Files</strong>. Your songs will be there.</span>
                                     </div>
                                 </div>
 
-                                <div style="display:flex; gap:8px;">
-                                    <button class="button button-primary button-small" onclick="openSongsFolder()" style="background:#1DB954; flex:1; margin-bottom:0;">Open Parent Folder in Finder</button>
-                                    <button class="button button-secondary button-small" onclick="toggleIphoneSteps()" style="margin-bottom:0;" id="iphoneStepsToggle">Show Steps</button>
-                                </div>
+                                <button class="button button-primary button-small" onclick="openSongsFolder()" style="background:#1DB954; width:100%; margin-bottom:0;">Open Song Folder</button>
                             </div>
                         </div>
                     </div>
@@ -309,86 +306,25 @@
         </div>
     </div>
 
-    <!-- TOKEN GUIDE MODAL -->
-    <div id="guideModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>How to Get Your SoundCloud Token</h2>
-                <button class="close-btn" onclick="closeGuide()">x</button>
-            </div>
-            <div class="modal-note">After clicking "Save Config", your token is saved and you won't need to do this again — unless it expires occasionally.</div>
-            <div class="guide-step">
-                <span class="guide-step-number">1</span>
-                <span class="guide-step-title">Log In to SoundCloud</span>
-                <div class="guide-step-content">Use the SoundCloud window that opened in your browser and log in to your account.</div>
-            </div>
-            <div class="guide-step">
-                <span class="guide-step-number">2</span>
-                <span class="guide-step-title">Open DevTools</span>
-                <div class="guide-step-content">Press <strong>Cmd + Option + I</strong> on Mac to open the browser Developer Tools panel.</div>
-            </div>
-            <div class="guide-step">
-                <span class="guide-step-number">3</span>
-                <span class="guide-step-title">Go to the Storage Tab</span>
-                <div class="guide-step-content">Click <strong>Storage</strong> at the top of the DevTools panel. If you're using Chrome, look for <strong>Application</strong> instead.</div>
-            </div>
-            <div class="guide-step">
-                <span class="guide-step-number">4</span>
-                <span class="guide-step-title">Click Cookies</span>
-                <div class="guide-step-content">In the left sidebar, click <strong>Cookies</strong> to expand it.</div>
-            </div>
-            <div class="guide-step">
-                <span class="guide-step-number">5</span>
-                <span class="guide-step-title">Select soundcloud.com</span>
-                <div class="guide-step-content">Under Cookies, click on <strong>https://soundcloud.com</strong> to see the cookies for that site.</div>
-            </div>
-            <div class="guide-step">
-                <span class="guide-step-number">6</span>
-                <span class="guide-step-title">Filter for Your Token</span>
-                <div class="guide-step-content">Use the filter bar at the top and type <strong>oauth</strong> to narrow down the results.</div>
-            </div>
-            <div class="guide-step">
-                <span class="guide-step-number">7</span>
-                <span class="guide-step-title">Find Your Token</span>
-                <div class="guide-step-content">Look for a value starting with <strong>2-</strong> followed by numbers and letters.
-                    <div class="code-block">2-123456-789012345-AbCdEfGhIjKlMnOp</div>
-                </div>
-            </div>
-            <div class="guide-step">
-                <span class="guide-step-number">8</span>
-                <span class="guide-step-title">Copy the Value</span>
-                <div class="guide-step-content">Click the cookie row and copy the full value from the Value column.</div>
-            </div>
-            <div class="guide-step">
-                <span class="guide-step-number">9</span>
-                <span class="guide-step-title">Paste It In</span>
-                <div class="guide-step-content">Close this guide and paste your token into the SoundCloud Auth Token field.</div>
-            </div>
-        </div>
-    </div>
+
 
     <!-- HOW TO USE MODAL - APPLE MUSIC -->
     <div id="howToUseAmModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>How to Use — Apple Music</h2>
+                <h2>How to Use - Apple Music</h2>
                 <button class="close-btn" onclick="closeHowToUse()">x</button>
             </div>
             <div class="modal-note">Make sure Apple Music is open on your Mac before starting a sync.</div>
             <div class="guide-step">
                 <span class="guide-step-number">1</span>
-                <span class="guide-step-title">Get Your SoundCloud Token</span>
-                <div class="guide-step-content">Click "How to Get?" next to the token field for a full walkthrough. You only need to do this once — your token is saved after clicking Save Config.</div>
-            </div>
-            <div class="guide-step">
-                <span class="guide-step-number">2</span>
                 <span class="guide-step-title">Paste Your Playlist URL</span>
                 <div class="guide-step-content">Copy the direct link to your SoundCloud playlist and paste it in the Playlist URL field.</div>
             </div>
             <div class="guide-step">
                 <span class="guide-step-number">3</span>
                 <span class="guide-step-title">Choose a Download Folder</span>
-                <div class="guide-step-content">Click Browse and create a new folder for these songs. Each playlist must have its own folder — never reuse an existing one.</div>
+                <div class="guide-step-content">Click Browse and create a new folder for these songs. Each playlist must have its own folder, never reuse an existing one.</div>
             </div>
             <div class="guide-step">
                 <span class="guide-step-number">4</span>
@@ -407,54 +343,49 @@
     <div id="howToUseSpModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>How to Use — Spotify</h2>
+                <h2>How to Use - Spotify</h2>
                 <button class="close-btn" onclick="closeHowToUse()">x</button>
             </div>
-            <div class="modal-note">Make sure the Spotify desktop app is installed and open on your Mac before starting a sync.</div>
+            <div class="modal-note">Do steps 1 and 2 once before your first sync. After that you only need to sync and your songs will appear automatically.</div>
             <div class="guide-step">
                 <span class="guide-step-number">1</span>
-                <span class="guide-step-title">Get Your SoundCloud Token</span>
-                <div class="guide-step-content">Click "How to Get?" next to the token field for a full walkthrough. You only need to do this once — your token is saved after clicking Save Config.</div>
+                <span class="guide-step-title">Enable Local Files on Mac</span>
+                <div class="guide-step-content">Open Spotify on your Mac, click your profile picture at the top right, then click Settings. Scroll down to <strong>Your Library</strong> and toggle on <strong>Show Local Files</strong>. Click <strong>Add Source</strong> and select the folder where you plan to download your songs. Do this before starting a sync.</div>
             </div>
             <div class="guide-step">
                 <span class="guide-step-number">2</span>
+                <span class="guide-step-title">Enable Local Files on iPhone</span>
+                <div class="guide-step-content">On your iPhone open Spotify, tap your profile picture, then tap Settings and Privacy, then Apps and Devices, and toggle on <strong>Local audio files</strong>.</div>
+            </div>
+            <div class="guide-step">
+                <span class="guide-step-number">3</span>
                 <span class="guide-step-title">Paste Your Playlist URL</span>
                 <div class="guide-step-content">Copy the direct link to your SoundCloud playlist and paste it in the Playlist URL field.</div>
             </div>
             <div class="guide-step">
-                <span class="guide-step-number">3</span>
+                <span class="guide-step-number">4</span>
                 <span class="guide-step-title">Choose a Download Folder</span>
-                <div class="guide-step-content">Click Browse and select or create a folder for these songs. This folder will be added as a Local Files source in Spotify.</div>
+                <div class="guide-step-content">Click Browse and select the same folder you added as a source in Step 1. Each playlist should have its own folder.</div>
             </div>
             <div class="guide-step">
-                <span class="guide-step-number">4</span>
+                <span class="guide-step-number">5</span>
                 <span class="guide-step-title">Click Start Sync</span>
                 <div class="guide-step-content">Songs will be downloaded to your folder and Spotify will open automatically.</div>
             </div>
             <div class="guide-step">
-                <span class="guide-step-number">5</span>
-                <span class="guide-step-title">Enable Local Files in Spotify</span>
-                <div class="guide-step-content">In Spotify, click your profile picture, then Settings. Scroll to <strong>Your Library</strong> and toggle on <strong>Show Local Files</strong>. Under <strong>Show songs from</strong>, click <strong>Add Source</strong> and select the folder you downloaded your songs into.</div>
-            </div>
-            <div class="guide-step">
                 <span class="guide-step-number">6</span>
                 <span class="guide-step-title">Add Songs to a Playlist</span>
-                <div class="guide-step-content">Go to Your Library, then Local Files in Spotify. Select your songs and add them to any existing or new playlist.</div>
+                <div class="guide-step-content">In Spotify go to Your Library, then Local Files. Select your songs and add them to any existing or new playlist.</div>
             </div>
             <div class="guide-step">
                 <span class="guide-step-number">7</span>
-                <span class="guide-step-title">iPhone — Enable Local Files</span>
-                <div class="guide-step-content">On your iPhone open Spotify, tap your profile picture, then Settings and Privacy, then Apps and Devices, and toggle on <strong>Local audio files</strong>.</div>
+                <span class="guide-step-title">Transfer to iPhone via USB</span>
+                <div class="guide-step-content">Plug your iPhone into your Mac. Open Finder and click your iPhone in the sidebar, then click Files, then Spotify. Drag your downloaded songs into that folder. They will appear in Spotify on your iPhone under Your Library then Local Files.</div>
             </div>
             <div class="guide-step">
                 <span class="guide-step-number">8</span>
-                <span class="guide-step-title">iPhone — Transfer via USB</span>
-                <div class="guide-step-content">Plug your iPhone into your Mac with a USB cable. Open Finder and select your iPhone in the sidebar. Find the Spotify folder and drag your downloaded songs into it. They will appear in Spotify on your iPhone under Your Library, then Local Files.</div>
-            </div>
-            <div class="guide-step">
-                <span class="guide-step-number">9</span>
-                <span class="guide-step-title">iPhone — Transfer Without USB</span>
-                <div class="guide-step-content">On your Mac, copy your downloaded music files in Finder. On your iPhone open the Files app, go to Browse, then On My iPhone, tap the Spotify folder, and paste the files there. They will appear in Spotify under Local Files.</div>
+                <span class="guide-step-title">Transfer to iPhone Without USB</span>
+                <div class="guide-step-content">On your Mac copy your downloaded music files in Finder. On your iPhone open the Files app, go to Browse, then On My iPhone, tap the Spotify folder, and paste the files there. They will appear in Spotify under Local Files.</div>
             </div>
         </div>
     </div>
@@ -487,10 +418,6 @@
             fetch(API_BASE + '/config/get')
                 .then(res => res.json())
                 .then(config => {
-                    if (config.auth_token) {
-                        document.getElementById('amAuthToken').value = config.auth_token;
-                        document.getElementById('spAuthToken').value = config.auth_token;
-                    }
                     if (config.playlist_url) document.getElementById('amPlaylistUrl').value = config.playlist_url;
                     if (config.download_path) document.getElementById('amDownloadPath').value = config.download_path;
                     if (config.sp_playlist_url) document.getElementById('spPlaylistUrl').value = config.sp_playlist_url;
@@ -506,13 +433,11 @@
             let config = {};
             if (tab === 'am') {
                 config = {
-                    authToken: document.getElementById('amAuthToken').value,
                     playlistUrl: document.getElementById('amPlaylistUrl').value,
                     downloadPath: document.getElementById('amDownloadPath').value
                 };
             } else {
                 config = {
-                    authToken: document.getElementById('spAuthToken').value,
                     spPlaylistUrl: document.getElementById('spPlaylistUrl').value,
                     spDownloadPath: document.getElementById('spDownloadPath').value
                 };
@@ -553,11 +478,10 @@
         }
 
         function startAmSync() {
-            const authToken = document.getElementById('amAuthToken').value.trim();
             const playlistUrl = document.getElementById('amPlaylistUrl').value.trim();
             const downloadPath = document.getElementById('amDownloadPath').value.trim();
 
-            if (!authToken || !playlistUrl || !downloadPath) {
+            if (!playlistUrl || !downloadPath) {
                 showAlert('Please fill in all required fields', 'error');
                 return;
             }
@@ -567,6 +491,10 @@
             terminal.innerHTML = '';
             terminal.classList.add('visible');
             document.getElementById('amCompleteBox').style.display = 'none';
+            document.getElementById('amProgressBox').style.display = 'none';
+            document.getElementById('amProgressBar').style.width = '0%';
+            document.getElementById('amProgressText').textContent = '0 / 0 songs';
+            document.getElementById('amErrorHint').style.display = 'none';
 
             const btn = document.getElementById('amSyncBtn');
             btn.disabled = true;
@@ -578,7 +506,7 @@
             fetch(API_BASE + '/sync/start', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ authToken, playlistUrl, downloadPath })
+                body: JSON.stringify({ playlistUrl, downloadPath })
             })
             .then(response => streamResponse(response, 'amTerminal', 'amStatusText', 'amCompleteBox', 'Sync complete - Check Apple Music'))
             .catch(err => {
@@ -592,13 +520,13 @@
         }
 
         let lastSpDownloadPath = '';
+        let lastSpPlaylistFolder = '';
 
         function startSpSync() {
-            const authToken = document.getElementById('spAuthToken').value.trim();
             const playlistUrl = document.getElementById('spPlaylistUrl').value.trim();
             const downloadPath = document.getElementById('spDownloadPath').value.trim();
 
-            if (!authToken || !playlistUrl || !downloadPath) {
+            if (!playlistUrl || !downloadPath) {
                 showAlert('Please fill in all required fields', 'error');
                 return;
             }
@@ -610,6 +538,10 @@
             terminal.classList.add('visible');
             document.getElementById('spCompleteBox').style.display = 'none';
             document.getElementById('iphoneSyncPanel').style.display = 'none';
+            document.getElementById('spProgressBox').style.display = 'none';
+            document.getElementById('spProgressBar').style.width = '0%';
+            document.getElementById('spProgressText').textContent = '0 / 0 songs';
+            document.getElementById('spErrorHint').style.display = 'none';
 
             const btn = document.getElementById('spSyncBtn');
             btn.disabled = true;
@@ -621,7 +553,7 @@
             fetch(API_BASE + '/sync/spotify', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ authToken, playlistUrl, downloadPath })
+                body: JSON.stringify({ playlistUrl, downloadPath })
             })
             .then(response => streamResponse(response, 'spTerminal', 'spStatusText', 'spCompleteBox', 'Sync complete - Check Spotify Local Files', true))
             .catch(err => {
@@ -635,25 +567,83 @@
         }
 
         function openSongsFolder() {
-            if (lastSpDownloadPath) {
-                const parent = lastSpDownloadPath.substring(0, lastSpDownloadPath.lastIndexOf('/'));
-                window.electronAPI.openFolder(parent || lastSpDownloadPath);
+            const folder = lastSpPlaylistFolder || lastSpDownloadPath;
+            if (folder) {
+                window.electronAPI.openForTransfer(folder);
             } else {
-                showAlert('No download folder set — run a sync first', 'error');
+                showAlert('No download folder set - run a sync first', 'error');
             }
         }
 
-        function toggleIphoneSteps() {
-            const steps = document.getElementById('iphoneSteps');
-            const btn = document.getElementById('iphoneStepsToggle');
-            const isVisible = steps.style.display !== 'none';
-            steps.style.display = isVisible ? 'none' : 'block';
-            btn.textContent = isVisible ? 'Show Steps' : 'Hide Steps';
-        }
 
         function streamResponse(response, terminalId, statusId, completeBoxId, successMsg, showIphonePanel = false) {
+            const prefix = terminalId.replace('Terminal', '');
+            const progressState = { total: 0, downloaded: 0, errors: 0 };
+
+            function updateProgressBar() {
+                const box = document.getElementById(prefix + 'ProgressBox');
+                const bar = document.getElementById(prefix + 'ProgressBar');
+                const text = document.getElementById(prefix + 'ProgressText');
+                if (!box || progressState.total === 0) return;
+                box.style.display = 'block';
+                const pct = Math.round((progressState.downloaded / progressState.total) * 100);
+                bar.style.width = pct + '%';
+                text.textContent = progressState.downloaded + ' / ' + progressState.total + ' songs';
+            }
+
+            function parseLogLine(line, statusEl) {
+                // Connecting phase
+                if (line.includes('[soundcloud:set] Verifying') || line.includes('[soundcloud:set] Logging')) {
+                    statusEl.textContent = 'Connecting to playlist...';
+                    statusEl.className = 'status-value syncing';
+                    return;
+                }
+                // Got total track count
+                const totalMatch = line.match(/Downloading (\d+) items of (\d+)/);
+                if (totalMatch) {
+                    progressState.total = parseInt(totalMatch[2]);
+                    progressState.downloaded = 0;
+                    updateProgressBar();
+                    statusEl.textContent = 'Downloading...';
+                    return;
+                }
+                // A track finished successfully
+                if (line.includes('[Mutagen] Adding metadata')) {
+                    progressState.downloaded++;
+                    updateProgressBar();
+                    return;
+                }
+                // A track was already downloaded, count it as done
+                if (line.includes('has already been downloaded')) {
+                    progressState.downloaded++;
+                    updateProgressBar();
+                    return;
+                }
+                // An error on a track (ignore retry lines)
+                if (line.startsWith('ERROR:') && !line.includes('Retrying')) {
+                    progressState.errors++;
+                    const hint = document.getElementById(prefix + 'ErrorHint');
+                    if (hint) hint.style.display = 'block';
+                    return;
+                }
+                // Capture the playlist subfolder name scdl creates
+                const playlistMatch = line.match(/\[download\] Downloading playlist: (.+)/);
+                if (playlistMatch && prefix === 'sp') {
+                    const playlistName = playlistMatch[1].trim();
+                    lastSpPlaylistFolder = lastSpDownloadPath + '/' + playlistName;
+                }
+                // All downloads done, now adding to library
+                if (line.includes('[download] Finished downloading playlist')) {
+                    const isSpotify = prefix === 'sp';
+                    statusEl.textContent = isSpotify ? 'Adding to Spotify...' : 'Adding to Apple Music...';
+                    statusEl.className = 'status-value syncing';
+                    return;
+                }
+            }
+
             const reader = response.body.getReader();
             const decoder = new TextDecoder();
+            const statusEl = document.getElementById(statusId);
             function read() {
                 reader.read().then(({ done, value }) => {
                     if (done) return;
@@ -662,7 +652,13 @@
                         if (line.startsWith('data: ')) {
                             try {
                                 const data = JSON.parse(line.slice(6));
-                                if (data.type === 'log') addTerminalLine(terminalId, data.message, 'log');
+                                if (data.type === 'log') {
+                                    parseLogLine(data.message, statusEl);
+                                    // Filter out noisy retry lines from terminal
+                                    if (!data.message.includes('Retrying (') && !data.message.includes('[download]  ')) {
+                                        addTerminalLine(terminalId, data.message, 'log');
+                                    }
+                                }
                                 else if (data.type === 'complete') {
                                     document.getElementById(statusId).textContent = 'Complete';
                                     document.getElementById(statusId).className = 'status-value success';
@@ -688,8 +684,6 @@
         }
 
         // MODALS
-        function openGuide() { document.getElementById('guideModal').classList.add('show'); }
-        function closeGuide() { document.getElementById('guideModal').classList.remove('show'); }
         function openHowToUse(tab) {
             if (tab === 'am') document.getElementById('howToUseAmModal').classList.add('show');
             else document.getElementById('howToUseSpModal').classList.add('show');
@@ -701,7 +695,6 @@
         function openSoundCloud() { window.open('https://soundcloud.com', '_blank'); }
 
         window.onclick = function(event) {
-            if (event.target == document.getElementById('guideModal')) closeGuide();
             if (event.target == document.getElementById('howToUseAmModal')) closeHowToUse();
             if (event.target == document.getElementById('howToUseSpModal')) closeHowToUse();
         }

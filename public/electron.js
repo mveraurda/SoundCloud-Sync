@@ -1,6 +1,5 @@
 const { app, BrowserWindow, Menu, ipcMain, dialog } = require('electron');
 const path = require('path');
-const isDev = require('electron-is-dev');
 const { spawn } = require('child_process');
 const express = require('express');
 const fs = require('fs');
@@ -32,12 +31,11 @@ function createServer() {
     const CONFIG_FILE = path.join(os.homedir(), '.soundcloud_sync', 'config.txt');
  
     expressApp.post('/api/config/save', (req, res) => {
-        const { authToken, playlistUrl, albumName, albumArtist, downloadPath, spPlaylistUrl, spDownloadPath } = req.body;
+        const { playlistUrl, albumName, albumArtist, downloadPath, spPlaylistUrl, spDownloadPath } = req.body;
         const dir = path.dirname(CONFIG_FILE);
         if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
  
-        const configContent = `AUTH_TOKEN=${authToken || ''}
-PLAYLIST_URL=${playlistUrl || ''}
+        const configContent = `PLAYLIST_URL=${playlistUrl || ''}
 DOWNLOAD_PATH=${downloadPath || ''}
 ALBUM_NAME=${albumName || ''}
 ALBUM_ARTIST=${albumArtist || ''}
@@ -71,20 +69,19 @@ SP_DOWNLOAD_PATH=${spDownloadPath || ''}`;
         res.setHeader('Cache-Control', 'no-cache');
         res.setHeader('Connection', 'keep-alive');
  
-        const { authToken, playlistUrl, downloadPath } = req.body;
+        const { playlistUrl, downloadPath } = req.body;
         const syncBin = getSyncBinPath();
         const ffmpegPath = getFfmpegPath();
- 
+
         if (!fs.existsSync(syncBin)) {
             res.write(`data: ${JSON.stringify({ type: 'error', message: 'Sync binary not found. Please reinstall the app.' })}\n\n`);
             res.end();
             return;
         }
- 
+
         const env = { ...process.env, FFMPEG_PATH: ffmpegPath, PATH: `${getResourcesPath()}:${process.env.PATH}` };
- 
+
         const proc = spawn(syncBin, [
-            '--auth-token', authToken,
             '--playlist-url', playlistUrl,
             '--download-path', downloadPath
         ], { env });
@@ -116,20 +113,19 @@ SP_DOWNLOAD_PATH=${spDownloadPath || ''}`;
         res.setHeader('Cache-Control', 'no-cache');
         res.setHeader('Connection', 'keep-alive');
  
-        const { authToken, playlistUrl, downloadPath } = req.body;
+        const { playlistUrl, downloadPath } = req.body;
         const spotifyBin = getSpotifyBinPath();
         const ffmpegPath = getFfmpegPath();
- 
+
         if (!fs.existsSync(spotifyBin)) {
             res.write(`data: ${JSON.stringify({ type: 'error', message: 'Spotify sync binary not found. Please reinstall the app.' })}\n\n`);
             res.end();
             return;
         }
- 
+
         const env = { ...process.env, FFMPEG_PATH: ffmpegPath, PATH: `${getResourcesPath()}:${process.env.PATH}` };
- 
+
         const proc = spawn(spotifyBin, [
-            '--auth-token', authToken,
             '--playlist-url', playlistUrl,
             '--download-path', downloadPath
         ], { env });
@@ -186,6 +182,31 @@ ipcMain.handle('open-folder', async (event, folderPath) => {
     try {
         const { shell } = require('electron');
         await shell.openPath(folderPath);
+        return { success: true };
+    } catch (e) {
+        return { success: false, error: e.message };
+    }
+});
+
+ipcMain.handle('open-for-transfer', async (event, folderPath) => {
+    try {
+        const script = `
+            tell application "Finder"
+                activate
+                set songFolder to POSIX file "${folderPath}" as alias
+                set w1 to make new Finder window
+                set target of w1 to songFolder
+                set bounds of w1 to {0, 50, 760, 700}
+                set w2 to make new Finder window
+                set bounds of w2 to {760, 50, 1520, 700}
+            end tell
+        `;
+        const { exec } = require('child_process');
+        await new Promise((resolve, reject) => {
+            exec(`osascript -e '${script.replace(/'/g, "'\\''")}'`, (err) => {
+                if (err) reject(err); else resolve();
+            });
+        });
         return { success: true };
     } catch (e) {
         return { success: false, error: e.message };

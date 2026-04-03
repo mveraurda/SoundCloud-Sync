@@ -1,10 +1,12 @@
 {
   "name": "soundcloud-sync",
-  "version": "2.0.2",
+  "version": "2.1.0",
   "main": "public/electron.js",
   "scripts": {
     "start": "electron .",
-    "build-mac": "electron-builder --mac"
+    "build-mac": "electron-builder --mac --arm64",
+    "build-mac-x64": "electron-builder --mac --x64",
+    "build-mac-universal": "electron-builder --mac --universal"
   },
   "dependencies": {
     "cors": "^2.8.5",
@@ -36,11 +38,18 @@
     "asar": false,
     "mac": {
       "target": [
-        "dmg",
-        "zip"
+        {
+          "target": "dmg",
+          "arch": ["universal", "arm64", "x64"]
+        },
+        {
+          "target": "zip",
+          "arch": ["universal", "arm64", "x64"]
+        }
       ],
       "category": "public.app-category.music",
-      "icon": "icon.icns"
+      "icon": "icon.icns",
+      "x64ArchFiles": "Contents/Resources/ffmpeg"
     },
     "dmg": {
       "contents": [

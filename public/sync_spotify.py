@@ -19,7 +19,7 @@ except:
 
 FFMPEG_PATH = os.environ.get('FFMPEG_PATH', 'ffmpeg')
 
-def download_playlist(auth_token, playlist_url, download_path):
+def download_playlist(playlist_url, download_path):
     print("Downloading playlist from SoundCloud...")
     print(f"URL: {playlist_url}")
     print(f"Path: {download_path}")
@@ -36,10 +36,9 @@ def download_playlist(auth_token, playlist_url, download_path):
         sys.argv = [
             'scdl',
             '-l', playlist_url,
-            '--auth-token', auth_token,
             '--path', download_path,
             '--onlymp3',
-            '--yt-dlp-args', f'--ffmpeg-location {FFMPEG_PATH}'
+            '--yt-dlp-args', f'--ffmpeg-location "{os.path.dirname(os.path.abspath(FFMPEG_PATH))}"'
         ]
         print("Calling scdl directly...")
         scdl_module._main()
@@ -67,14 +66,13 @@ def open_spotify():
 
 def main():
     parser = argparse.ArgumentParser(description='SoundCloud to Spotify Sync')
-    parser.add_argument('--auth-token', required=True)
     parser.add_argument('--playlist-url', required=True)
     parser.add_argument('--download-path', required=True)
 
     args = parser.parse_args()
     print("Starting Spotify sync...")
 
-    success = download_playlist(args.auth_token, args.playlist_url, args.download_path)
+    success = download_playlist(args.playlist_url, args.download_path)
 
     if success:
         open_spotify()

@@ -18,7 +18,15 @@ except:
 
 FFMPEG_PATH = os.environ.get('FFMPEG_PATH', 'ffmpeg')
 
-def download_playlist(auth_token, playlist_url, download_path):
+def get_subdirs(path):
+    try:
+        return {d: os.path.getmtime(os.path.join(path, d))
+                for d in os.listdir(path)
+                if os.path.isdir(os.path.join(path, d))}
+    except:
+        return {}
+
+def download_playlist(playlist_url, download_path):
     print("Downloading playlist from SoundCloud...")
     print(f"URL: {playlist_url}")
     print(f"Path: {download_path}")
@@ -30,31 +38,43 @@ def download_playlist(auth_token, playlist_url, download_path):
     env['PATH'] = ffmpeg_dir + ':' + env.get('PATH', '')
     os.environ.update(env)
 
+    before_dirs = get_subdirs(download_path)
+
     try:
         import scdl.scdl as scdl_module
         sys.argv = [
             'scdl',
             '-l', playlist_url,
-            '--auth-token', auth_token,
             '--path', download_path,
             '--onlymp3',
-            '--yt-dlp-args', f'--ffmpeg-location {FFMPEG_PATH}'
+            '--yt-dlp-args', f'--ffmpeg-location "{os.path.dirname(os.path.abspath(FFMPEG_PATH))}"'
         ]
         print("Calling scdl directly...")
         scdl_module._main()
         print("Download complete!")
-        return True
     except SystemExit as e:
-        if e.code == 0 or str(e) == '0':
-            print("Download complete!")
-            return True
-        print(f"scdl exited: {e}")
-        return False
+        if e.code != 0 and str(e) != '0':
+            print(f"scdl exited: {e}")
+            return None
     except Exception as e:
         print(f"Download error: {e}")
         import traceback
         traceback.print_exc()
-        return False
+        return None
+
+    after_dirs = get_subdirs(download_path)
+
+    # Prefer a newly created directory, fall back to most recently modified
+    new_dirs = {d for d in after_dirs if d not in before_dirs}
+    if new_dirs:
+        playlist_folder = os.path.join(download_path, list(new_dirs)[0])
+    elif after_dirs:
+        playlist_folder = os.path.join(download_path, max(after_dirs, key=after_dirs.get))
+    else:
+        playlist_folder = download_path
+
+    print(f"Playlist folder: {playlist_folder}")
+    return playlist_folder
 
 def get_apple_music_count():
     print("Checking Apple Music library...")
@@ -75,7 +95,7 @@ def add_songs_to_apple_music(folder_path):
     print(f"Found {len(mp3_files)} files to add")
 
     if not mp3_files:
-        print("No mp3 files found — check your auth token and playlist URL")
+        print("No mp3 files found — check your playlist URL")
         return
 
     for mp3_file in mp3_files:
@@ -88,7 +108,6 @@ def add_songs_to_apple_music(folder_path):
 
 def main():
     parser = argparse.ArgumentParser(description='SoundCloud to Apple Music Sync')
-    parser.add_argument('--auth-token', required=True)
     parser.add_argument('--playlist-url', required=True)
     parser.add_argument('--download-path', required=True)
 
@@ -96,10 +115,10 @@ def main():
     print("Starting sync process...")
 
     get_apple_music_count()
-    success = download_playlist(args.auth_token, args.playlist_url, args.download_path)
+    playlist_folder = download_playlist(args.playlist_url, args.download_path)
 
-    if success:
-        add_songs_to_apple_music(args.download_path)
+    if playlist_folder:
+        add_songs_to_apple_music(playlist_folder)
 
     print("Sync complete!")
 

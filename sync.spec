@@ -20,8 +20,8 @@ a = Analysis(
         'scdl.patches.trim_filenames',
     ],
     hookspath=['hooks'],
-    runtime_hooks=[],
-    excludes=[],
+    runtime_hooks=['hooks/rthook_yt_dlp_fix.py'],
+    excludes=['curl_cffi'],
     noarchive=False,
 )
 pyz = PYZ(a.pure)
@@ -37,5 +37,5 @@ exe = EXE(
     strip=False,
     upx=False,
     console=True,
-    target_arch='arm64',
+    target_arch='universal2',
 )
